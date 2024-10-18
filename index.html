@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Vehicle Care</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #333;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 2em;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #333;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-left: 5px solid #333;
+        }
+
+        .info-section {
+            margin: 40px 0;
+            text-align: center;
+        }
+
+        .info-section img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .info-section p {
+            font-size: 1.2em;
+            color: #333;
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #333;
+            color: white;
+        }
+
+        footer p {
+            margin: 0;
+        }
+    </style>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.1.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<header>
+    <h1>Total Vehicle Care</h1>
+</header>
+
+<div class="container">
+    <h2>Submit Your Vehicle Repair Details</h2>
+    <form id="repairForm">
+        <div class="form-group">
+            <label for="location">Vehicle Location (Address)</label>
+            <input type="text" id="location" name="location" required>
+        </div>
+
+        <div class="form-group">
+            <label for="vehicleType">Vehicle Type</label>
+            <select id="vehicleType" name="vehicleType" required>
+                <option value="">--Select Vehicle Type--</option>
+                <option value="Car">Car</option>
+                <option value="Bike">Bike</option>
+                <option value="Scooty">Scooty</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="model">Vehicle Model Name/Number</label>
+            <input type="text" id="model" name="model" required>
+        </div>
+
+        <div class="form-group">
+            <label for="problem">Describe the Problem</label>
+            <textarea id="problem" name="problem" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <label for="distance">Distance to Location (in km)</label>
+            <input type="number" id="distance" name="distance" required>
+        </div>
+
+        <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+
+        <div class="form-group">
+            <label for="contact">Your Contact Number</label>
+            <input type="tel" id="contact" name="contact" required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Your Email</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+
+        <button type="button" onclick="submitForm()">Submit</button>
+    </form>
+
+    <div id="result" class="result" style="display: none;"></div>
+
+    <div class="info-section">
+        <img src="https://www.clintongarage.co.uk/wp-content/uploads/2019/01/Two-Car-Mechanics-Working-on-Cars.jpg" alt="Vehicle Repair Service">
+        <p>Welcome to Total Vehicle Care! We provide top-notch vehicle repair services across Akola. Our experienced mechanics will come to your location and fix your vehicle on-site or tow it to our garage if needed. Quick, reliable, and hassle-free!</p>
+    </div>
+</div>
+
+<footer>
+    <p>&copy; 2024 Total Vehicle Care. All rights reserved.</p>
+</footer>
+
+<script>
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyDIXgec8KPKQf5Se8MlAcfYKT2aGdzuIPA",
+  authDomain: "total-vehicle-care.firebaseapp.com",
+  projectId: "total-vehicle-care",
+  storageBucket: "total-vehicle-care.appspot.com",
+  messagingSenderId: "980669170024",
+  appId: "1:980669170024:web:6bd35df6b2d6cdf1be56dd"
+    };
+
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    // Submit form data to Firebase
+    function submitForm() {
+        const location = document.getElementById('location').value;
+        const vehicleType = document.getElementById('vehicleType').value;
+        const model = document.getElementById('model').value;
+        const problem = document.getElementById('problem').value;
+        const distance = document.getElementById('distance').value;
+        const name = document.getElementById('name').value;
+        const contact = document.getElementById('contact').value;
+        const email = document.getElementById('email').value;
+
+        const visitCharge = (Math.ceil(distance / 10)) * 100;
+        let towingCharge = 0;
+
+        if (distance > 5 && distance <= 10) {
+            towingCharge = 500;
+        } else if (distance <= 5) {
+            towingCharge = 250;
+        }
+
+        const totalCharge = visitCharge + towingCharge;
+
+        // Store data in Firebase
+        db.collection("vehicleRepairs").add({
+            location: location,
+            vehicleType: vehicleType,
+            model: model,
+            problem: problem,
+            distance: distance,
+            name: name,
+            contact: contact,
+            email: email,
+            visitCharge: visitCharge,
+            towingCharge: towingCharge,
+            totalCharge: totalCharge,
+            timestamp: new Date()
+        }).then(() => {
+            document.getElementById('result').style.display = 'block';
+            document.getElementById('result').innerHTML = `
+                <h3>Submission Successful!</h3>
+                <p>Visit Charge: Rs. ${visitCharge}</p>
+                <p>Towing Charge: Rs. ${towingCharge}</p>
+                <p><strong>Total Charge: Rs. ${totalCharge}</strong></p>
+                <p>We will contact you soon for further details.</p>
+            `;
+        }).catch((error) => {
+            console.error("Error writing document: ", error);
+            alert("Error submitting the form. Please try again.");
+        });
+    }
+</script>
+
+</body>
+</html>
